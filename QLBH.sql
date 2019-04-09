@@ -223,27 +223,95 @@ ON K.MAKH = H.MAKH
 WHERE NGHD = '1/1/2007'
 
 --9.	In ra số hóa đơn, trị giá các hóa đơn do nhân viên có tên “Nguyen Van B” lập trong ngày 28/10/2006.
-
+SELECT H.SOHD, H.TRIGIA FROM NHANVIEN N JOIN HOADON H
+ON N.MANV = H.MANV
+WHERE N.HOTEN = 'Nguyen Van B'
+AND H.NGHD = '20061028'
+GO
 --10.	In ra danh sách các sản phẩm (MASP,TENSP) được khách hàng có tên “Nguyen Van A” mua trong tháng 10/2006.
-
+SELECT S.MASP, TENSP FROM SANPHAM S
+JOIN CTHD C ON S.MASP = C.MASP
+WHERE EXISTS ( SELECT * 
+	FROM CTHD JOIN HOADON H
+	ON C.SOHD = H.SOHD
+	WHERE MONTH(H.NGHD) = 10 AND YEAR(H.NGHD) = 2006
+	AND H.MAKH IN (SELECT K.MAKH 
+		FROM KHACHHANG K JOIN HOADON
+		ON K.MAKH = H.MAKH
+		WHERE K.HOTEN = 'Nguyen Van A'
+		)
+	AND S.MASP = C.MASP -- Vì có exists
+	)
 --11.	Tìm các số hóa đơn đã mua sản phẩm có mã số “BB01” hoặc “BB02”.
-
+SELECT DISTINCT SOHD FROM CTHD
+WHERE MASP IN ('BB01', 'BB02')
+GO
 --12.	Tìm các số hóa đơn đã mua sản phẩm có mã số “BB01” hoặc “BB02”, mỗi sản phẩm mua với số lượng từ 10 đến 20.
-
+SELECT DISTINCT SOHD FROM CTHD
+WHERE MASP IN ('BB01', 'BB02')
+AND SL >= 10 AND SL <= 20
+GO
 --13.	Tìm các số hóa đơn mua cùng lúc 2 sản phẩm có mã số “BB01” và “BB02”, mỗi sản phẩm mua với số lượng từ 10 đến 20.
-
+SELECT SOHD FROM CTHD A
+WHERE A.MASP = 'BB01'
+AND SL BETWEEN 10 AND 20
+AND EXISTS (SELECT * 
+	FROM CTHD B
+	WHERE B.MASP = 'BB02'
+	AND SL BETWEEN 10 AND 20
+	AND A.SOHD = B.SOHD
+	)
 --14.	In ra danh sách các sản phẩm (MASP,TENSP) do “Trung Quoc” sản xuất hoặc các sản phẩm được bán ra trong ngày 1/1/2007.
+SELECT S.MASP, TENSP FROM SANPHAM S
+JOIN CTHD C ON S.MASP = C.MASP
+WHERE S.NUOCSX = 'Trung Quoc'
+OR S.MASP IN (SELECT C2.MASP 
+	FROM HOADON H JOIN CTHD C2
+	ON H.SOHD = C2.SOHD
+	WHERE H.NGHD = '20070101'
+	)
 
 --15.	In ra danh sách các sản phẩm (MASP,TENSP) không bán được.
+-- CÁCH 1
+SELECT S.MASP, TENSP FROM SANPHAM S
+WHERE S.MASP NOT IN (SELECT C.MASP FROM CTHD C)
 
+-- CÁCH 2
+SELECT S.MASP, TENSP
+FROM SANPHAM S
+WHERE NOT EXISTS(SELECT *
+FROM SANPHAM S2 INNER JOIN CTHD C
+ON S2.MASP = C.MASP
+AND S2.MASP = S.MASP)
 --16.	In ra danh sách các sản phẩm (MASP,TENSP) không bán được trong năm 2006.
-
+SELECT S.MASP, TENSP FROM SANPHAM S
+WHERE S.MASP NOT IN (SELECT C.MASP 
+	FROM CTHD C JOIN HOADON H
+	ON C.SOHD = H.SOHD
+	WHERE YEAR(H.NGHD) = 2006
+	)
 
 --17.	In ra danh sách các sản phẩm (MASP,TENSP) do “Trung Quoc” sản xuất không bán được trong năm 2006.
-
+SELECT S.MASP, TENSP FROM SANPHAM S
+WHERE NUOCSX = 'Trung Quoc'
+AND S.MASP NOT IN (SELECT C.MASP 
+	FROM HOADON H JOIN CTHD C
+	ON H.SOHD = C.SOHD
+	WHERE YEAR(H.NGHD) = 2006
+	)
 --18.	Tìm số hóa đơn đã mua tất cả các sản phẩm do Singapore sản xuất.
+SELECT H.SOHD 
+FROM HOADON H
+WHERE NOT EXISTS(SELECT *
+FROM SANPHAM S
+WHERE NUOCSX = 'SINGAPORE'
+AND NOT EXISTS(SELECT * 
+FROM CTHD C
+WHERE C.SOHD = H.SOHD
+AND C.MASP = S.MASP))
 
 --19.	Tìm số hóa đơn trong năm 2006 đã mua ít nhất tất cả các sản phẩm do Singapore sản xuất.
+
 
 --20.	Có bao nhiêu hóa đơn không phải của khách hàng đăng ký thành viên mua?
 
