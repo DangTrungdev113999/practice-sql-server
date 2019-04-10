@@ -413,7 +413,9 @@ AND GIA IN (
 SELECT TOP 3 * FROM KHACHHANG
 ORDER BY DOANHSO DESC
 --32.	Tính tổng số sản phẩm do “Trung Quoc” sản xuất.
-
+SELECT COUNT(DISTINCT MASP) FROM SANPHAM
+WHERE NUOCSX = 'Trung Quoc'
+GO
 --33.	Tính tổng số sản phẩm của từng nước sản xuất.
 
 --34.	Với từng nước sản xuất, tìm giá bán cao nhất, thấp nhất, trung bình của các sản phẩm.
