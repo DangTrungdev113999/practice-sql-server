@@ -423,18 +423,69 @@ GROUP BY NUOCSX
 GO
 
 --34.	Với từng nước sản xuất, tìm giá bán cao nhất, thấp nhất, trung bình của các sản phẩm.
-
+SELECT NUOCSX, MAX(GIA) AS N'giá cao nhất',
+MIN(GIA) AS N'giá thấp nhất', AVG(GIA) AS N'giá trung bình'
+FROM SANPHAM
+GROUP BY NUOCSX
+GO
 --35.	Tính doanh thu bán hàng mỗi ngày.
-
+SELECT NGHD, SUM(TRIGIA) FROM HOADON
+GROUP BY NGHD
+GO
 --36.	Tính tổng số lượng của từng sản phẩm bán ra trong tháng 10/2006.
+SELECT C.MASP, COUNT(C.MASP) FROM HOADON H
+JOIN CTHD C ON C.SOHD = H.SOHD
+WHERE MONTH(H.NGHD) = 10 AND YEAR(H.NGHD) = 2006
+GROUP BY C.MASP
+GO
 
+SELECT MASP, COUNT(DISTINCT MASP) AS TONGSO
+FROM SANPHAM
+WHERE MASP IN(SELECT MASP
+FROM CTHD C INNER JOIN HOADON H
+ON C.SOHD = H.SOHD
+WHERE MONTH(NGHD) = 10 AND YEAR(NGHD) = 2006)
+GROUP BY MASP
 --37.	Tính doanh thu bán hàng của từng tháng trong năm 2006.
-
+SELECT MONTH(NGHD) AS N'THÁNG', SUM(TRIGIA) AS N'TỔNG GIÁ TRỊ' FROM HOADON
+WHERE YEAR(NGHD) = 2006
+GROUP BY MONTH(NGHD)
+GO
 --38.	Tìm hóa đơn có mua ít nhất 4 sản phẩm khác nhau.
 
---39.	Tìm hóa đơn có mua 3 sản phẩm do “Viet Nam” sản xuất (3 sản phẩm khác nhau).
+SELECT H.MAKH, C.SOHD ,COUNT(C.SOHD) FROM HOADON H 
+JOIN CTHD C ON C.SOHD = H.SOHD
+GROUP BY H.MAKH, C.SOHD
+HAVING COUNT(C.SOHD) >= 4
+ORDER BY H.MAKH 
 
+/*
+SELECT SOHD FROM HOADON H
+WHERE EXISTS(
+	SELECT H1.MAKH, H1.SOHD, COUNT(H1.SOHD) FROM HOADON H1
+	GROUP BY MAKH, H1.SOHD
+	HAVING COUNT(H1.SOHD) >= 4
+	)
+GO
+*/
+
+--39.	Tìm hóa đơn có mua 3 sản phẩm do “Viet Nam” sản xuất (3 sản phẩm khác nhau).
+SELECT H.MAKH, C.SOHD, COUNT(C.SOHD) FROM HOADON H
+JOIN CTHD C ON H.SOHD = C.SOHD
+JOIN SANPHAM S ON S.MASP = C.MASP
+WHERE S.NUOCSX = 'Viet Nam' 
+GROUP BY H.MAKH, C.SOHD
+HAVING COUNT(C.SOHD) >= 3
+GO
 --40.	Tìm khách hàng (MAKH, HOTEN) có số lần mua hàng nhiều nhất. 
+SELECT K.MAKH, K.HOTEN  FROM KHACHHANG K
+WHERE K.MAKH = (SELECT TOP 1 MAKH, COUNT(SOHD)
+	FROM HOADON H
+	GROUP BY H.MAKH
+	ORDER BY COUNT(DISTINCT SOHD) DESC
+	)
+
+SELECT * FROM HOADON
 
 --41.	Tháng mấy trong năm 2006, doanh số bán hàng cao nhất ?
 
