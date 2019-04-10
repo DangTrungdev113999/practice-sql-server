@@ -453,9 +453,11 @@ GROUP BY NUOCSX
 SELECT B.NUOCSX, MASP, TENSP
 FROM (SELECT NUOCSX, MAX(GIA) AS MAX
 FROM SANPHAM
-GROUP BY NUOCSX) AS B LEFT JOIN SANPHAM S 
+GROUP BY NUOCSX) AS B JOIN SANPHAM S 
 ON S.GIA = B.MAX 
 WHERE B.NUOCSX = S.NUOCSX
+
+SELECT * FROM SANPHAM
 --44.	Tìm nước sản xuất sản xuất ít nhất 3 sản phẩm có giá bán khác nhau.
 
 --45.	*Trong 10 khách hàng có doanh số cao nhất, tìm khách hàng có số lần mua hàng nhiều nhất.
