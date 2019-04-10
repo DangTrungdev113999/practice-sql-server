@@ -488,7 +488,7 @@ WHERE K.MAKH = (SELECT TOP 1 MAKH, COUNT(SOHD)
 SELECT * FROM HOADON
 
 --41.	Tháng mấy trong năm 2006, doanh số bán hàng cao nhất ?
-
+SELECT * FROM HOADON
 --42.	Tìm sản phẩm (MASP, TENSP) có tổng số lượng bán ra thấp nhất trong năm 2006.
 
 --43.	*Mỗi nước sản xuất, tìm sản phẩm (MASP,TENSP) có giá bán cao nhất.
