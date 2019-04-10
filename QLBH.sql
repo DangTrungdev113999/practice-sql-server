@@ -417,6 +417,10 @@ SELECT COUNT(DISTINCT MASP) FROM SANPHAM
 WHERE NUOCSX = 'Trung Quoc'
 GO
 --33.	Tính tổng số sản phẩm của từng nước sản xuất.
+SELECT NUOCSX, COUNT(MASP) AS N'TỔNG SỐ SẢN PHẨM' 
+FROM SANPHAM
+GROUP BY NUOCSX
+GO
 
 --34.	Với từng nước sản xuất, tìm giá bán cao nhất, thấp nhất, trung bình của các sản phẩm.
 
