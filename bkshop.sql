@@ -72,3 +72,76 @@ UPDATE giao_dich_khachhang
 SET so_tien_rut = 200
 WHERE id = 6
 
+-- tạo trigger không cho xoá giao dịch có id = 6
+CREATE TRIGGER KKK
+ON giao_dich_khachhang
+FOR DELETE
+AS
+IF 6 IN (SELECT id FROM DELETED)
+	BEGIN
+		PRINT N'KHÔNG XOÁ GIAO DỊCH NÀY'
+		ROLLBACK TRANSACTION
+	END
+
+DELETE giao_dich_khachhang
+WHERE giao_dich_khachhang.id = 6
+
+-- tạo trigger đếm số bản ghi đã xoá
+CREATE TRIGGER count_ban_ghi_deleted
+ON giao_dich_khachhang
+FOR DELETE
+AS
+	BEGIN
+		DECLARE @soBanGhi int;
+		SELECT @soBanGhi = (SELECT COUNT(*) FROM DELETED);
+		PRINT N'số bản ghi đã xoá là ' + convert(varchar(100), @soBanGhi);
+	END
+
+	-- Lệnh xóa
+DELETE giao_dich_khachhang
+WHERE giao_dich_khachhang.id > 0 AND giao_dich_khachhang.id < 3
+
+-- Xem cú pháp tạo trigger
+EXEC sp_helptext 'count_ban_ghi_deleted'
+
+-- Tạo bảng Phòng Ban
+CREATE TABLE PhongBan(
+id_pb int PRIMARY KEY,
+ten_pb nvarchar(128)
+)
+GO
+-- Tạo bảng Nhân Viên
+CREATE TABLE NhanVien(
+id_nv int PRIMARY KEY,
+id_pb int FOREIGN KEY REFERENCES PhongBan(id_pb),
+ten_nv nvarchar(128)
+)
+GO
+INSERT INTO PhongBan VALUES
+(1,'Phong ke toan'),
+(2,'Hanh chinh TH'),
+(3,'Phong ky thuat')
+GO
+INSERT INTO NhanVien VALUES
+(1, 1, 'Vu Tuan Minh'),
+(2, 1, 'Nguyen Cong Phuong'),
+(3, 3, 'Pham Van Mach')
+GO
+
+-- TẠO trigger khi xoá  id của phòng ban thì xoá luôn id của nhân viên
+ALTER TRIGGER Xoa
+ON PhongBan
+INSTEAD OF DELETE -- nó sẽ được thực thi trước khi ràng buộc được sẩy ra
+AS
+	BEGIN
+		DELETE NhanVien
+		WHERE NhanVien.id_pb in
+		(SELECT id_pb FROM deleted)
+	END
+
+-- Thực hiện xóa dữ liệu có ràng buộc
+DELETE PhongBan
+WHERE id_pb = 1
+
+SELECT * FROM NhanVien
+SELECT * FROM PhongBan
