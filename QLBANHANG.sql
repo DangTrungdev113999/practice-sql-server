@@ -333,3 +333,43 @@ where ProductId in (
 	)
 )
 
+-- tạo thủ tục
+
+CREATE PROC A
+AS
+BEGIN
+	SELECT * FROM PRODUCT
+END
+
+--  Thực thi thủ tục
+EXEC A
+
+--  tạo thủ tục truyền tham số
+CREATE PROC getbill
+@id int
+AS
+BEGIN
+	SELECT * FROM PRODUCT
+	WHERE ProductId = @id
+END
+
+EXEC getbill 3
+
+-- tạo thủ tục có tham số đầu ra
+CREATE PROC gettotal
+@name NVARCHAR(50),
+@sum INT OUTPUT
+AS
+BEGIN
+	SELECT @sum = SUM(b.billId) FROM BILL  B JOIN CUSTOMER C
+	ON B.cusId = C.cusId
+	WHERE C.name = @name
+END
+
+-- thực thi thủ tục
+DECLARE @sum INT;
+EXEC gettotal 'Mai Hoa', @sum OUTPUT;
+PRINT 'so luong don hang: ' + convert(varchar(100), @sum)
+GO
+
+SELECT * FROM BILL
