@@ -138,19 +138,100 @@ JOIN Marks M ON M.SubjectID = S.SubjectID
 GROUP BY S.SubjectID, S.SubjectName
 GO
 -- 12. Hiển thị môn học nào có nhiều điểm dưới trung bình nhất (<5)
+SELECT TOP 1 S.*, COUNT(M.Mark) FROM Marks M
+JOIN Subjects S ON S.SubjectID = M.Mark 
+GROUP BY S.SubjectID, S.SubjectName
+ORDER BY COUNT(M.Mark)
+GO
+
 
 -- tẠO RÀNG BUỘC
+
 -- 1 viết check Constaint để kiểm tra độ tuổi nhập vào trong bảng Student yêu caafuu Age > 15 và Age < 50
+ALTER TABLE students
+ADD CHECK( Age BETWEEN 15 AND 50)
+GO
 -- 2 Loại bỏ quan hệ giữa các bảng.
 -- 3 Xoá học viên có StudentID là 1.
 -- 4 Trong bảng Student thêm một column Status có kiểu dữ liệu là Bit và có giá trị default là 1
+ALTER TABLE students
+ADD status BIT DEFAULT(1)
+GO
+SELECT * FROM Students
 -- 5. Cập nhật giá trị Status trong bảng Student là 1.
-
+UPDATE students
+SET status = 1
+GO
 -- TẠO THỦ TỤC.
 -- 1. Thủ tục nhận tham số là StudentID và hiển thị điểm từng môn học của học sinh này
+ALTER PROC DIEM
+@ID INT
+AS
+BEGIN
+	SELECT S.StudentID, S.StudentName, SS.SubjectName, M.Mark FROM Students S
+	JOIN Marks M ON M.StudentID = S.StudentID
+    JOIN Subjects SS ON SS.SubjectID = M.SubjectID
+	WHERE S.StudentID = @ID
+END
+
+EXEC DIEM 1
 -- 2. Thủ tục nhận tham số là subjectID, thực hiện cập nhật toàn hộ điểm của sinh viên trong môn học này về 0
+CREATE PROC MON111
+@ID INT
+AS
+BEGIN
+	UPDATE Marks
+	SET Mark = 0
+	WHERE SubjectID = @ID
+END
+
+exec MON111 1
+
+SELECT * FROM Marks
+
 -- 3. Tạo thủ tục nhận tham số đầu vào là StudentID, subjectID và hiển thị điểm môn học của sinh viên này.
+CREATE PROC ABC
+ @StuID int, @subID int
+AS 
+BEGIN
+	SELECT S.StudentID, S.StudentName, SS.SubjectName, M.Mark FROM students S
+	JOIN Marks M ON M.StudentID = S.StudentID
+	JOIN Subjects SS ON SS.SubjectID = M.SubjectID
+	WHERE S.StudentID = @StuID AND SS.SubjectID = @subID
+END
+
+EXEC ABC 1,2
 
 --TẠO TRIGGER
 --1. Trigger thực hiện khi xoá Student thì xoá toàn bộ thông tin tương ứng ở các bảng khác
+CREATE TRIGGER HAHA
+ON students
+INSTEAD OF DELETE
+AS
+BEGIN
+	DELETE ClassStudent  
+	WHERE studentID = (SELECT StudentID FROM deleted)
+
+	DELETE Marks  
+	WHERE studentID = (SELECT StudentID FROM deleted)
+END
+
+DELETE students
+WHERE StudentID = 1
 --2. Trigger khi thêm mới MARK, nếu Mark < 0 thì thông bào lỗi và không cho insert
+ALTER TRIGGER HEHE
+ON Marks
+FOR UPDATE
+AS
+	IF((SELECT Mark FROM inserted) < 0)
+	BEGIN 
+		PRINT N' ĐIỂM KHÔNG THỂ NHỎ HƠN KHÔNG';
+		ROLLBACK TRANSACTION;
+	END
+
+	select * from Marks
+
+UPDATE Marks
+SET Mark = -32
+WHERE StudentID = 2
+go
