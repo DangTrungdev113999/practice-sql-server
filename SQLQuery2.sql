@@ -221,17 +221,17 @@ WHERE StudentID = 1
 --2. Trigger khi thêm mới MARK, nếu Mark < 0 thì thông bào lỗi và không cho insert
 ALTER TRIGGER HEHE
 ON Marks
-FOR UPDATE
+FOR DELETE 
 AS
-	IF((SELECT Mark FROM inserted) < 0)
+	IF(SELECT Mark FROM deleted) < 0
 	BEGIN 
 		PRINT N' ĐIỂM KHÔNG THỂ NHỎ HƠN KHÔNG';
 		ROLLBACK TRANSACTION;
 	END
 
-	select * from Marks
+select * from Marks
 
 UPDATE Marks
 SET Mark = -32
-WHERE StudentID = 2
+WHERE StudentID = 3
 go
