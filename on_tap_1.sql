@@ -23,9 +23,6 @@ CREATE TABLE Categories (
 )
 go
 
-delete from Categories
-
-
 ALTER TABLE News
 ADD primary key(Id)
 go
@@ -87,43 +84,27 @@ danh mục trùng tên thì hiển thị thông báo Danh mục này đã
 có trogn bảng, vui lòng thử lại
 */
 
-alter trigger CheckCatName
+create trigger CheckCatName1
 on Categories for insert
 AS
 BEGIN TRAN
-	DECLARE @name1 nvarchar(100);
-	DECLARE @maxId int;
-	DECLARE @a int = 1;
-	select @name1 = (select count(Name) from inserted);
-	select @maxId = (select MAX(Id) from Categories);
-	
-
-	while(@a <= @maxId)
+	DECLARE @Name nvarchar(100);
+	DECLARE @amoutName int
+	select @Name = (select name from inserted)
+	set @amoutName = (select count(*) from Categories where Name = @Name)
+	if(@amoutName > 1)
 		begin
-			if(@name1 = (select Name from Categories
-							 where Id = @a))
-				BEGIN
-					PRINT N'vui long nhap lai'
-					ROLLBACK TRAN
-				END
-			set @a = @a + 1;
+			rollback transaction
 		end
-
-
+	
 
 INSERT INTO Categories(Name, Ordering)
 VALUES(N'danh mục 1', 1), (N'danh mục 2', 2)
 go
 
-select * from Categories
-
 
 -- yêu cầu 3: tạo thủ tục
 -- Tạo thủ tục sp_addnewCategory  thêm mới vào bảng Categories
-
-select * from Categories
-
-select * from News
 
 CREATE PROC sp_addnewCategory
 @name nvarchar(100)
@@ -170,13 +151,13 @@ EXEC up_selectNewById 11
 GO
 
 -- Tạo thủ tục cho phép tìm kiếm gần đúng them Title của News
-CREATE PROC up_likeTitle
+ALTER PROC up_likeTitle
 @title nvarchar(100)
 AS
 BEGIN
-	SELECT * FROM News WHERE Title LIKE '%@title%'
+	SELECT * FROM News WHERE Title LIKE concat('%', @title, '%')
 END
 go
 
-EXEC up_likeTitle N'C1'
+EXEC up_likeTitle N'ABC1'
 GO
