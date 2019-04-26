@@ -1,4 +1,5 @@
-﻿-- Bài thực hành Lab 09
+
+-- Bài thực hành Lab 09
 CREATE DATABASE BKShop
 GO
 USE BKShop
@@ -117,7 +118,7 @@ id_pb int FOREIGN KEY REFERENCES PhongBan(id_pb),
 ten_nv nvarchar(128)
 )
 GO
-INSERT INTO PhongBan VALUES
+INSERT INTO PhongBan VALUESb   
 (1,'Phong ke toan'),
 (2,'Hanh chinh TH'),
 (3,'Phong ky thuat')
